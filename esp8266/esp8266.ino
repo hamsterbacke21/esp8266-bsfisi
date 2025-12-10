@@ -144,6 +144,12 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
       font-size: 0.75rem;
       color: #6b7280;
     }
+    .warning {
+      margin-top: 8px;
+      font-size: 0.9rem;
+      color: #f97316;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
@@ -158,6 +164,8 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
         <span class="temperature-unit">°C</span>
       </div>
     </div>
+
+    <div id="warning" class="warning"></div>
 
     <div class="radio-group">
       <div class="radio-title">Lichtsteuerung</div>
@@ -185,6 +193,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
   </div>
 
   <script>
+      let rickRolled = false;
     function updateStatus(isOn) {
       const chip = document.getElementById('chip');
       const label = document.getElementById('chip-label');
@@ -217,21 +226,48 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
       }
     }
 
-    async function updateTemperature() {
+        async function updateTemperature() {
       try {
         const res = await fetch('/temperature');
         const txt = await res.text();
+
+        const tempElem = document.getElementById('temp');
+        const warningElem = document.getElementById('warning');
+
         if (txt === 'nan') {
-          document.getElementById('temp').textContent = '--.-';
+          tempElem.textContent = '--.-';
+          warningElem.textContent = '';
         } else {
-          document.getElementById('temp').textContent = txt;
+          tempElem.textContent = txt;
+
+          const val = parseFloat(txt.replace(',', '.'));
+
+          if (!isNaN(val)) {
+            // Warnung ab 29 °C
+            if (val >= 29.0) {
+              warningElem.textContent = 'Obacht Mike, die Maus ist im Raum!';
+            } else {
+              warningElem.textContent = '';
+            }
+
+            // Rickroll ab 31 °C, nur einmal
+            if (val >= 31.0 && !rickRolled) {
+              rickRolled = true;
+              // kleine Verzögerung, damit man die Anzeige noch sieht
+              setTimeout(() => {
+                window.location.href = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+              }, 1000);
+            }
+          } else {
+            warningElem.textContent = '';
+          }
         }
       } catch (e) {
         console.error(e);
       }
     }
 
-    // Initiale Updates
+
     setInterval(updateTemperature, 2000);
     window.onload = () => {
       updateStatus(false);
@@ -241,6 +277,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
 </body>
 </html>
 )rawliteral";
+
 
 // ===== ROUTEN =====
 void handleRoot() {

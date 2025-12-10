@@ -176,6 +176,7 @@ This project demonstrates:
 
 Educational project for Berufsschule ITT course.
 
-## 👤 Author
+## 👤 Authors
 
-Created for 2nd year ITT coursework - Berufsschule
+[Mike Fox](https://github.com/MikeLeonFox)
+[Dimitrios Kotsis](https://github.com/hamsterbacke21)

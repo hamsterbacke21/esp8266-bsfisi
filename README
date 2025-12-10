@@ -1,0 +1,16 @@
+#include <OneWire.h>
+a
+#include <DallasTemperature.h>
+a
+#define ONE_WIRE_BUS 5 // Der PIN D1 (GPIO 5) wird als BUS-Pin verwendet
+OneWire oneWire(ONE_WIRE_BUS);
+DallasTemperature DS18B20(&oneWire);
+float temperature; // In dieser Variable wird die Temperatur gespeichert
+void setup(){
+Serial.begin(115200); // Serielle Schnittstelle initialisieren
+DS18B20.begin(); // DS18B20 initialisieren
+}
+A
+void loop(){
+DS18B20.requestTemperatures();
+‎Read more

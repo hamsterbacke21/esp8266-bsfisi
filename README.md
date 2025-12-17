@@ -1,182 +1,208 @@
-# ESP8266 SmartDevices Control System
+# ESP8266 SmartDevices Steuerungssystem
 
-A modern web-based control system for ESP8266 microcontrollers to control lights and monitor temperature with a beautiful, animated user interface.
+Ein modernes webbasiertes Steuerungssystem für ESP8266-Mikrocontroller zur Steuerung von Lichtern und Überwachung der Temperatur mit einer schönen, animierten Benutzeroberfläche.
 
-## 📋 Overview
+## Überblick
 
-This project implements a WiFi-enabled smart home control system using an ESP8266 microcontroller. It creates a web server that serves a modern, responsive web interface for controlling connected devices and monitoring sensors.
+Dieses Projekt implementiert ein WiFi-fähiges Smart-Home-Steuerungssystem mit einem ESP8266-Mikrocontroller. Es erstellt einen Webserver, der eine moderne, responsive Weboberfläche zur Steuerung angeschlossener Geräte und Überwachung von Sensoren bereitstellt.
 
-## ✨ Features
+## Funktionen
 
-- **LED Control**: Turn lights on/off remotely via web interface
-- **Temperature Monitoring**: Real-time temperature display (ready for DS18B20 sensor integration)
-- **Modern Web UI**: Beautiful dark-themed interface with animations
-  - Glassmorphism design
-  - Smooth hover and click animations
-  - Responsive layout for mobile and desktop
-  - Status indicators with pulsing effects
-- **WiFi Connectivity**: Accessible from any device on your network
+- **LED-Steuerung**: Schalten Sie Lichter über die Weboberfläche per Fernsteuerung ein/aus
+- **Temperaturüberwachung**: Echtzeit-Temperaturanzeige (bereit für DS18B20-Sensorintegration)
+- **Moderne Web-UI**: Schöne dunkle Benutzeroberfläche mit Animationen
+  - Glassmorphismus-Design
+  - Flüssige Hover- und Klick-Animationen
+  - Responsives Layout für Mobilgeräte und Desktop
+  - Statusanzeigen mit pulsierenden Effekten
+- **WiFi-Konnektivität**: Von jedem Gerät in Ihrem Netzwerk zugänglich
 
-## 🛠️ Hardware Requirements
+## Hardware-Anforderungen
 
-- **ESP8266 NodeMCU** or similar ESP8266 board
-- **Built-in LED** (GPIO2/D4 on NodeMCU)
-- **(Optional) DS18B20 Temperature Sensor** - Connect to GPIO5 (D1) for real temperature readings
+- **ESP8266 NodeMCU** oder ähnliches ESP8266-Board
+- **Eingebaute LED** (GPIO2/D4 auf NodeMCU)
+- **(Optional) DS18B20-Temperatursensor** - Verbinden Sie mit GPIO5 (D1) für echte Temperaturmessungen
 
-## 📦 Software Requirements
+## Software-Anforderungen
 
-### Arduino IDE Libraries:
-- `ESP8266WiFi` - WiFi connectivity (included with ESP8266 board package)
-- `ESP8266WebServer` - Web server functionality (included with ESP8266 board package)
+### Arduino IDE Bibliotheken:
 
-### Optional (for real temperature sensor):
-- `OneWire` - For DS18B20 communication
-- `DallasTemperature` - For DS18B20 temperature sensor
+- `ESP8266WiFi` - WiFi-Konnektivität (im ESP8266-Board-Paket enthalten)
+- `ESP8266WebServer` - Webserver-Funktionalität (im ESP8266-Board-Paket enthalten)
 
-## 🔧 Configuration
+### Optional (für echten Temperatursensor):
 
-### WiFi Settings
-Edit these lines in `esp8266.ino`:
+- `OneWire` - Für DS18B20-Kommunikation
+- `DallasTemperature` - Für DS18B20-Temperatursensor
+
+## Konfiguration
+
+### WiFi-Einstellungen
+
+Bearbeiten Sie diese Zeilen in `esp8266.ino`:
+
 ```cpp
-const char* ssid = "test";        // Your WiFi network name
-const char* password = "testpw";  // Your WiFi password
+const char* ssid = "test";        // Ihr WiFi-Netzwerkname
+const char* password = "testpw";  // Ihr WiFi-Passwort
 ```
 
-### LED Pin
+### LED-Pin
+
 ```cpp
-const int LED_PIN = 2;  // GPIO2 (D4 on NodeMCU)
+const int LED_PIN = 2;  // GPIO2 (D4 auf NodeMCU)
 ```
 
-## 📁 File Structure
+## Dateistruktur
 
 ### `esp8266.ino`
-Main Arduino sketch containing:
-- WiFi connection setup
-- Web server configuration
-- HTML/CSS/JavaScript interface (embedded in PROGMEM)
-- API endpoints:
-  - `/` - Main web interface
-  - `/led?state=on|off` - LED control endpoint
-  - `/temperature` - Temperature reading endpoint
+
+Haupt-Arduino-Sketch mit:
+
+- WiFi-Verbindungseinrichtung
+- Webserver-Konfiguration
+- HTML/CSS/JavaScript-Oberfläche (eingebettet in PROGMEM)
+- API-Endpunkte:
+  - `/` - Haupt-Weboberfläche
+  - `/led?state=on|off` - LED-Steuerungs-Endpunkt
+  - `/temperature` - Temperaturauslesungs-Endpunkt
 
 ### `test.html`
-Standalone HTML file for testing and preview. Contains the same interface as embedded in the `.ino` file.
 
-## 🚀 Installation & Usage
+Eigenständige HTML-Datei zum Testen und zur Vorschau. Enthält dieselbe Oberfläche wie in der `.ino`-Datei eingebettet.
 
-1. **Install ESP8266 Board Support**:
-   - Open Arduino IDE
-   - Go to File → Preferences
-   - Add to "Additional Board Manager URLs": 
+## Installation & Verwendung
+
+1. **ESP8266-Board-Unterstützung installieren**:
+
+   - Öffnen Sie Arduino IDE
+   - Gehen Sie zu Datei → Voreinstellungen
+   - Fügen Sie unter "Zusätzliche Boardverwalter-URLs" hinzu:
      `http://arduino.esp8266.com/stable/package_esp8266com_index.json`
-   - Go to Tools → Board → Board Manager
-   - Search for "esp8266" and install
+   - Gehen Sie zu Werkzeuge → Board → Boardverwalter
+   - Suchen Sie nach "esp8266" und installieren Sie es
 
-2. **Configure WiFi**:
-   - Edit `ssid` and `password` in the sketch
+2. **WiFi konfigurieren**:
 
-3. **Upload**:
-   - Select board: Tools → Board → ESP8266 Boards → NodeMCU 1.0
-   - Select port: Tools → Port → (your ESP8266 port)
-   - Click Upload
+   - Bearbeiten Sie `ssid` und `password` im Sketch
 
-4. **Find IP Address**:
-   - Open Serial Monitor (115200 baud)
-   - Wait for "Connected!" message
-   - Note the displayed IP address (e.g., `192.168.1.123`)
+3. **Hochladen**:
 
-5. **Access Interface**:
-   - Open web browser
-   - Navigate to the IP address shown in Serial Monitor
-   - Enjoy the modern control interface!
+   - Wählen Sie Board: Werkzeuge → Board → ESP8266 Boards → NodeMCU 1.0
+   - Wählen Sie Port: Werkzeuge → Port → (Ihr ESP8266-Port)
+   - Klicken Sie auf Hochladen
 
-## 🎨 Web Interface Features
+4. **IP-Adresse finden**:
 
-The embedded web interface includes:
-- **Gradient background** with animated floating orbs
-- **Glassmorphic cards** with blur effects
-- **Interactive buttons** with ripple animations
-- **Status indicator** showing light state with pulsing dot
-- **Temperature display** with gradient text and subtle pulse animation
-- **Responsive design** adapting to all screen sizes
+   - Öffnen Sie den Seriellen Monitor (115200 Baud)
+   - Warten Sie auf die Meldung "Connected!"
+   - Notieren Sie die angezeigte IP-Adresse (z.B. `192.168.1.123`)
 
-## 🔌 API Endpoints
+5. **Zugriff auf die Oberfläche**:
+   - Öffnen Sie einen Webbrowser
+   - Navigieren Sie zur IP-Adresse, die im Seriellen Monitor angezeigt wird
+   - Genießen Sie die moderne Steuerungsoberfläche!
+
+## Web-Oberflächen-Funktionen
+
+Die eingebettete Weboberfläche umfasst:
+
+- **Verlaufshintergrund** mit animierten schwebenden Kugeln
+- **Glassmorphe Karten** mit Unschärfeeffekten
+- **Interaktive Schaltflächen** mit Wellen-Animationen
+- **Statusanzeige** zeigt Lichtzustand mit pulsierendem Punkt
+- **Temperaturanzeige** mit Verlaufstext und subtiler Puls-Animation
+- **Responsives Design** passt sich allen Bildschirmgrößen an
+
+## API-Endpunkte
 
 ### `GET /`
-Returns the main HTML interface
+
+Gibt die Haupt-HTML-Oberfläche zurück
 
 ### `GET /led?state=on`
-Turns the LED on
-- Returns: `"on"` (text/plain)
+
+Schaltet die LED ein
+
+- Gibt zurück: `"on"` (text/plain)
 
 ### `GET /led?state=off`
-Turns the LED off
-- Returns: `"off"` (text/plain)
+
+Schaltet die LED aus
+
+- Gibt zurück: `"off"` (text/plain)
 
 ### `GET /temperature`
-Returns current temperature reading
-- Returns: `"24.7"` (text/plain, dummy value)
-- Ready for DS18B20 sensor integration
 
-## 🌡️ Adding a Real Temperature Sensor (DS18B20)
+Gibt die aktuelle Temperaturmessung zurück
 
-To use a real DS18B20 temperature sensor:
+- Gibt zurück: `"24.7"` (text/plain, Dummy-Wert)
+- Bereit für DS18B20-Sensorintegration
 
-1. **Install libraries**:
+## Hinzufügen eines echten Temperatursensors (DS18B20)
+
+Um einen echten DS18B20-Temperatursensor zu verwenden:
+
+1. **Bibliotheken installieren**:
+
    - OneWire
    - DallasTemperature
 
-2. **Connect hardware**:
+2. **Hardware anschließen**:
+
    - DS18B20 Data → GPIO5 (D1)
    - DS18B20 VCC → 3.3V
    - DS18B20 GND → GND
-   - Add 4.7kΩ pull-up resistor between Data and VCC
+   - 4,7kΩ Pull-up-Widerstand zwischen Data und VCC hinzufügen
 
-3. **Update code**:
-   - Uncomment DS18B20 code in the sketch
-   - Replace dummy `getTemperature()` function with actual sensor reading
+3. **Code aktualisieren**:
+   - Kommentieren Sie den DS18B20-Code im Sketch aus
+   - Ersetzen Sie die Dummy-Funktion `getTemperature()` durch tatsächliches Sensorauslesen
 
-## 🐛 Troubleshooting
+## Fehlerbehebung
 
-**Can't connect to WiFi:**
-- Check SSID and password
-- Ensure 2.4GHz WiFi (ESP8266 doesn't support 5GHz)
-- Check Serial Monitor for connection messages
+**Kann keine Verbindung zu WiFi herstellen:**
 
-**Can't access web interface:**
-- Verify IP address in Serial Monitor
-- Ensure device is on same network as ESP8266
-- Try pinging the IP address
+- Überprüfen Sie SSID und Passwort
+- Stellen Sie sicher, dass 2,4 GHz WiFi verwendet wird (ESP8266 unterstützt kein 5 GHz)
+- Überprüfen Sie den Seriellen Monitor auf Verbindungsmeldungen
 
-**LED not working:**
-- Note: NodeMCU LED is active LOW (lights up when pin is LOW)
-- Check LED_PIN matches your board
+**Kann nicht auf die Weboberfläche zugreifen:**
 
-## 📝 Technical Details
+- Überprüfen Sie die IP-Adresse im Seriellen Monitor
+- Stellen Sie sicher, dass sich das Gerät im selben Netzwerk wie der ESP8266 befindet
+- Versuchen Sie, die IP-Adresse zu pingen
 
-- **Microcontroller**: ESP8266
-- **Operating Voltage**: 3.3V
-- **WiFi**: 802.11 b/g/n (2.4GHz)
-- **Web Server**: ESP8266WebServer library
-- **Temperature Update Interval**: 2 seconds
-- **Serial Baud Rate**: 115200
+**LED funktioniert nicht:**
 
-## 🎓 Educational Notes
+- Hinweis: NodeMCU-LED ist aktiv LOW (leuchtet, wenn Pin LOW ist)
+- Überprüfen Sie, ob LED_PIN zu Ihrem Board passt
 
-This project demonstrates:
-- IoT device programming
-- Web server implementation on microcontrollers
-- RESTful API design
-- Modern web interface development
-- Responsive design principles
-- CSS animations and transitions
-- Asynchronous JavaScript (async/await)
+## Technische Details
 
-## 📄 License
+- **Mikrocontroller**: ESP8266
+- **Betriebsspannung**: 3,3V
+- **WiFi**: 802.11 b/g/n (2,4 GHz)
+- **Webserver**: ESP8266WebServer-Bibliothek
+- **Temperaturaktualisierungsintervall**: 2 Sekunden
+- **Serielle Baudrate**: 115200
 
-Educational project for Berufsschule ITT course.
+## Pädagogische Hinweise
 
-## 👤 Authors
+Dieses Projekt demonstriert:
+
+- IoT-Geräteprogrammierung
+- Webserver-Implementierung auf Mikrocontrollern
+- RESTful-API-Design
+- Entwicklung moderner Weboberflächen
+- Prinzipien des responsiven Designs
+- CSS-Animationen und Übergänge
+- Asynchrones JavaScript (async/await)
+
+## Lizenz
+
+Bildungsprojekt für den Berufsschul-ITT-Kurs.
+
+## Autoren
 
 [Mike Fox](https://github.com/MikeLeonFox)
 [Dimitrios Kotsis](https://github.com/hamsterbacke21)

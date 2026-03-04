@@ -1,27 +1,44 @@
-#include <ESP8266WiFi.h>
-#include <ESP8266WebServer.h>
-#include <OneWire.h>
 #include <DallasTemperature.h>
+#include <ESP8266WebServer.h>
+#include <ESP8266WiFi.h>
+#include <OneWire.h>
+#include <PubSubClient.h>
 
 // ===== WLAN-DATEN =====
-const char* ssid     = "wlan1313";
-const char* password = "wlan1313pw";
+const char *ssid = "wlan1313";
+const char *password = "wlan1313pw";
 
 // ===== LED-PIN =====
-const int LED_PIN = 2;   // eingebaute LED (D4)
+const int LED_PIN = 2; // eingebaute LED (D4)
 
 // ===== DS18B20 – ONE-WIRE-BUS =====
 // D1 (GPIO 5) als Daten-Pin für den DS18B20
-#define ONE_WIRE_BUS D3   // oder D1, wenn dein Board das Makro kennt
+#define ONE_WIRE_BUS D3 // oder D1, wenn dein Board das Makro kennt
 
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature DS18B20(&oneWire);
 
+// ===== MQTT-BROKER =====
+const char *mqttServer = "192.168.1.172";
+const int mqttPort = 1883;
+const char *mqttClientId = "esp8266-smartdevice";
+
+// Topics
+const char *topicTemp = "esp8266/temperature";   // publish
+const char *topicLedState = "esp8266/led/state"; // publish
+const char *topicLedSet = "esp8266/led/set";     // subscribe
+
 // ===== WEBSERVER =====
 ESP8266WebServer server(80);
 
+// ===== MQTT-CLIENT =====
+WiFiClient wifiClient;
+PubSubClient mqtt(wifiClient);
+
 // ===== GLOBAL =====
 bool lightState = false;
+unsigned long lastMqttPublish = 0;
+const unsigned long mqttInterval = 1000; // ms between publishes
 
 // ===== TEMPERATUR AUS DS18B20 =====
 float getTemperature() {
@@ -34,6 +51,43 @@ float getTemperature() {
   }
 
   return t;
+}
+
+// ===== MQTT CALLBACK (eingehende Nachrichten) =====
+void mqttCallback(char *topic, byte *payload, unsigned int length) {
+  String msg;
+  for (unsigned int i = 0; i < length; i++)
+    msg += (char)payload[i];
+  msg.trim();
+
+  if (String(topic) == topicLedSet) {
+    if (msg == "on") {
+      digitalWrite(LED_PIN, LOW); // LED an (invertiert)
+      lightState = true;
+    } else if (msg == "off") {
+      digitalWrite(LED_PIN, HIGH); // LED aus
+      lightState = false;
+    }
+    mqtt.publish(topicLedState, lightState ? "on" : "off", true);
+    Serial.print("LED via MQTT gesetzt: ");
+    Serial.println(msg);
+  }
+}
+
+// ===== MQTT VERBINDEN / WIEDERVERBINDEN =====
+void mqttReconnect() {
+  if (mqtt.connected())
+    return;
+  Serial.print("Verbinde mit MQTT-Broker … ");
+  if (mqtt.connect(mqttClientId)) {
+    Serial.println("verbunden!");
+    mqtt.subscribe(topicLedSet);
+    Serial.print("Abonniert: ");
+    Serial.println(topicLedSet);
+  } else {
+    Serial.print("Fehler, rc=");
+    Serial.println(mqtt.state());
+  }
 }
 
 // ===== HTML-SEITE MIT JS (ALLES IM STRING!) =====
@@ -278,21 +332,18 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
 </html>
 )rawliteral";
 
-
 // ===== ROUTEN =====
-void handleRoot() {
-  server.send_P(200, "text/html", INDEX_HTML);
-}
+void handleRoot() { server.send_P(200, "text/html", INDEX_HTML); }
 
 void handleLed() {
   if (server.hasArg("state")) {
     String s = server.arg("state");
 
     if (s == "on") {
-      digitalWrite(LED_PIN, LOW);    // LED an (invertiert)
+      digitalWrite(LED_PIN, LOW); // LED an (invertiert)
       lightState = true;
     } else if (s == "off") {
-      digitalWrite(LED_PIN, HIGH);   // LED aus
+      digitalWrite(LED_PIN, HIGH); // LED aus
       lightState = false;
     }
   }
@@ -334,6 +385,12 @@ void setup() {
   Serial.print("IP-Adresse: ");
   Serial.println(WiFi.localIP());
 
+  // MQTT einrichten
+  mqtt.setServer(mqttServer, mqttPort);
+  mqtt.setCallback(mqttCallback);
+  mqttReconnect();
+
+  // Webserver-Routen
   server.on("/", handleRoot);
   server.on("/led", handleLed);
   server.on("/temperature", handleTemperature);
@@ -343,5 +400,26 @@ void setup() {
 }
 
 void loop() {
+  // MQTT verbunden halten
+  if (!mqtt.connected())
+    mqttReconnect();
+  mqtt.loop();
+
+  // Webserver bedienen
   server.handleClient();
+
+  // Temperatur periodisch per MQTT senden
+  unsigned long now = millis();
+  if (now - lastMqttPublish >= mqttInterval) {
+    lastMqttPublish = now;
+    float t = getTemperature();
+    if (!isnan(t)) {
+      String payload = String(t, 1);
+      mqtt.publish(topicTemp, payload.c_str());
+      Serial.print("MQTT veröffentlicht [esp8266/temperature]: ");
+      Serial.println(payload);
+    } else {
+      Serial.println("Temperaturlesefehler – nichts veröffentlicht.");
+    }
+  }
 }
